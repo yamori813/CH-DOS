@@ -102,8 +102,8 @@ READ_CMT_BASIC:
 	XOR	A			;
 	LD	(HL),A			;=EOL
 	POP	HL			;
-;	CALL	IS_INFO_ON		;
-;	JR	Z,.L19			;
+	CALL	IS_INFO_ON		;
+	JR	Z,.L19			;
 
 	CALL	IPRINT			;
 	DB	"[BAS]",CR,LF		;
