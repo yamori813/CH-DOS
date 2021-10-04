@@ -1,5 +1,13 @@
 	EXTERN	INFO_SW
+	EXTERN	STR2ARG0
+	EXTERN	EXP2WORD
+	EXTERN	ARG0
+	EXTERN	ARG1
+	EXTERN	ARG2
+	EXTERN	ARG3
+	EXTERN	ARGNUM
 	GLOBAL	IS_INFO_ON
+	GLOBAL	GET_ARGS
 
 ;=================================================
 ;[SUB]インフォメーションスイッチがオンかチェックする
@@ -76,72 +84,72 @@ IS_INFO_ON:
 ;	LD	HL,MSG_NOT_SUPPORTED_EXT 	;不一致処理
 ;	JP	ERR				;
 ;
-;;=================================================
-;;[SUB]入力された引数をワークにセットする
-;; "文字列",式1,式2 -> (ARG0),(ARG1),(ARG2),(ARG3)
-;; 式1,式2,式3は省略可
-;;IN  HL=TP
-;;OUT HL=TP,(ARG0)=文字列ポインタ,(ARG1~3)=WORD型,(ARGNUM)=有効なWORD型パラメータの数 0~3
-;;=================================================
-;GET_ARGS:
-;	CALL	RESET_ARGS			;入力パラメータ用ワークを初期化
-;	CALL	STR2ARG0			;(ARG0)<-文字列ポインタ
-;
-;	DEC	HL				;！重要！
-;	RST	10H				;BASIC解析
-;	LD	A,(HL)				;カンマが無ければ終了する
-;	CP	","				;
-;	RET	NZ				;
-;
-;	CALL	EXP2WORD			;(ARG1)<-式１の評価結果
-;	LD	(ARG1),DE			;
-;	CALL	.INC				;(ARGNUM)++
-;	LD	A,(HL)				;
-;	CP	","				;
-;	RET	NZ				;
-;
-;	CALL	EXP2WORD			;(ARG2)<-式２の評価結果
-;	LD	(ARG2),DE			;
-;	CALL	.INC				;(ARGNUM)++
-;	LD	A,(HL)				;
-;	CP	","				;
-;	RET	NZ				;
-;
-;	CALL	EXP2WORD			;(ARG2)<-式３の評価結果
-;	LD	(ARG3),DE			;
-;
-;.INC:	PUSH	HL				;有効な入力パラメータの数を＋１する
-;	LD	HL,ARGNUM			;
-;	INC	(HL)				;
-;	POP	HL				;
-;	RET					;
-;
-;;=================================================
-;;[SUB]引数用ワークをリセットする
-;;IN  -
-;;OUT (ARG0~ARG3)<-0000H,ARGNUM<-0
-;;=================================================
-;RESET_ARGS:
-;;	PUSH	HL				;
-;;	LD	HL,0000H			;
-;;	LD	(ARG0),HL			;
-;;	LD	(ARG1),HL			;
-;;	LD	(ARG2),HL			;
-;;	LD	(ARG3),HL			;
-;;	XOR	A				;
-;;	LD	(ARGNUM),A			;
-;;	POP	HL
-;
+;=================================================
+;[SUB]入力された引数をワークにセットする
+; "文字列",式1,式2 -> (ARG0),(ARG1),(ARG2),(ARG3)
+; 式1,式2,式3は省略可
+;IN  HL=TP
+;OUT HL=TP,(ARG0)=文字列ポインタ,(ARG1~3)=WORD型,(ARGNUM)=有効なWORD型パラメータの数 0~3
+;=================================================
+GET_ARGS:
+	CALL	RESET_ARGS			;入力パラメータ用ワークを初期化
+	CALL	STR2ARG0			;(ARG0)<-文字列ポインタ
+
+	DEC	HL				;！重要！
+	RST	10H				;BASIC解析
+	LD	A,(HL)				;カンマが無ければ終了する
+	CP	","				;
+	RET	NZ				;
+
+	CALL	EXP2WORD			;(ARG1)<-式１の評価結果
+	LD	(ARG1),DE			;
+	CALL	.INC				;(ARGNUM)++
+	LD	A,(HL)				;
+	CP	","				;
+	RET	NZ				;
+
+	CALL	EXP2WORD			;(ARG2)<-式２の評価結果
+	LD	(ARG2),DE			;
+	CALL	.INC				;(ARGNUM)++
+	LD	A,(HL)				;
+	CP	","				;
+	RET	NZ				;
+
+	CALL	EXP2WORD			;(ARG2)<-式３の評価結果
+	LD	(ARG3),DE			;
+
+.INC:	PUSH	HL				;有効な入力パラメータの数を＋１する
+	LD	HL,ARGNUM			;
+	INC	(HL)				;
+	POP	HL				;
+	RET					;
+
+;=================================================
+;[SUB]引数用ワークをリセットする
+;IN  -
+;OUT (ARG0~ARG3)<-0000H,ARGNUM<-0
+;=================================================
+RESET_ARGS:
 ;	PUSH	HL				;
-;	LD	B,09H				;
-;	LD	HL,ARG0				;
+;	LD	HL,0000H			;
+;	LD	(ARG0),HL			;
+;	LD	(ARG1),HL			;
+;	LD	(ARG2),HL			;
+;	LD	(ARG3),HL			;
 ;	XOR	A				;
-;.L1:	LD	(HL),A				;
-;	INC	HL				;
-;	DJNZ	.L1				;
-;	POP	HL				;
-;	RET					;
-;
+;	LD	(ARGNUM),A			;
+;	POP	HL
+
+	PUSH	HL				;
+	LD	B,09H				;
+	LD	HL,ARG0				;
+	XOR	A				;
+.L1:	LD	(HL),A				;
+	INC	HL				;
+	DJNZ	.L1				;
+	POP	HL				;
+	RET					;
+
 ;;=================================================
 ;;[SUB]16進文字コード照合
 ;;IN  A=文字コード

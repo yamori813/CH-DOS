@@ -1,11 +1,18 @@
 
+        INCLUDE "N80.inc"
+        INCLUDE "LABELS.inc"
+
 
 		GLOBAL	MOUNT
 		GLOBAL	FILES
 		GLOBAL	LOAD
+		GLOBAL	STR2ARG0
 		EXTERN	INIT_CH376
 		EXTERN	CH_FILES
 		EXTERN	CH_LOAD
+		EXTERN	GET_ARGS
+		EXTERN	STR2BUFF
+		EXTERN	ARG0
 
 ;
 ;;=================================================
@@ -138,6 +145,7 @@ LOAD:
 ;	LD	HL,EXT_LOAD_TABLE		;
 ;	CALL	EXT_TABLE_JUMP			;拡張子に対応したロードルーチンへジャンプする
 ;	CALL	RESTORE_WDIR			;
+	CALL	GET_ARGS			;
 	PUSH	HL
 	CALL	CH_LOAD
 	JP	CLOSE_CMD			;
@@ -356,14 +364,14 @@ CLOSE_CMD:
 ;	CALL	DW0_POP				;セクタ＃を復帰
 ;	RET
 ;
-;;=================================================
-;;[CMD]文字列式の結果が格納されたアドレスを(ARG0)にセットする
-;;IN  
-;;OUT (ARG0),HL=TP
-;;=================================================
-;STR2ARG0:
-;	CALL	STR2BUFF			;
-;	LD	DE,STR_BUFF			;
-;	LD	(ARG0),DE			;
-;	RET					;
-;
+;=================================================
+;[CMD]文字列式の結果が格納されたアドレスを(ARG0)にセットする
+;IN  
+;OUT (ARG0),HL=TP
+;=================================================
+STR2ARG0:
+	CALL	STR2BUFF			;
+	LD	DE,STR_BUFF			;
+	LD	(ARG0),DE			;
+	RET					;
+
