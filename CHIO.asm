@@ -5,15 +5,6 @@
 	INCLUDE "N80.inc"
 	INCLUDE "LABELS.inc"
 
-	EXTERN	PRT_DENT
-	EXTERN	FETCH_1BYTE
-	EXTERN	DISP
-	EXTERN	READ_CMT
-
-	EXTERN	MOUNT
-	EXTERN	FILES
-	EXTERN	LOAD
-
 	GLOBAL	FIREWALL
 	GLOBAL	IS_CALLBACK
 	GLOBAL	INFO_BUF
@@ -31,6 +22,15 @@
 	GLOBAL	INIT_CH376
 	GLOBAL	CH_FILES
 	GLOBAL	CH_LOAD
+
+	EXTERN	PRT_DENT
+	EXTERN	FETCH_1BYTE
+	EXTERN	DISP
+	EXTERN	READ_CMT
+
+	EXTERN	MOUNT
+	EXTERN	FILES
+	EXTERN	LOAD
 
 	CMD	EQU	0FDH
 	DATA	EQU	0FCH
@@ -64,6 +64,8 @@ START:
 	CALL	INIT_CMDHOOK
 
 	JP	05C66H		; Back to mon
+
+;=================================================
 
 INIT_CH376:
 	
@@ -104,23 +106,24 @@ INIT_CH376:
 
 	RET
 
+;=================================================
+
 CH_FILES:
 
 	LD	HL, FILENAME
 	CALL	SETFNAME
-; *****
+
 	LD	A, FILE_OPEN
 	CALL	INTRCMD
 
 	LD	HL, ROOTNAME
 	CALL	SETFNAME
-; *****
+
 	LD	A, FILE_OPEN
 	CALL	INTRCMD
 
 	CALL	DIR_WALK
 
-; *****
 	LD	A, GET_STATUS
 	CALL	WRITECMD
 	CALL	READDATA
@@ -128,7 +131,6 @@ CH_FILES:
 ;	PUT	' '
 	CALL	READUSB
 
-; *****
 	LD	A, FILE_CLOSE
 	CALL	WRITECMD
 	LD	A, 0
@@ -137,14 +139,13 @@ CH_FILES:
 
 	RET
 
+;=================================================
+
 CH_LOAD:
 
-;	LD	HL, BASFILE
-;	LD	HL, BINFILE
 	LD	HL, (ARG0)
 	CALL	SETFNAME
 
-; *****
 	LD	A, FILE_OPEN
 	CALL	INTRCMD
 
@@ -159,9 +160,6 @@ CH_LOAD:
 	CALL	READDATA
 	CALL	READDATA
 
-;	CALL	READ_FP_SCTR
-
-;	CALL	FETCH_1BYTE
 	CALL	READ_CMT
 
 	LD	A, FILE_CLOSE
@@ -170,7 +168,6 @@ CH_LOAD:
 	CALL	WRITEDATA
 	CALL	WAITINT
 
-; *****
 	LD	A, GET_STATUS
 	CALL	WRITECMD
 	CALL	READDATA
@@ -228,6 +225,8 @@ READ_FP_SCTR:
 
 	RET
 
+;=================================================
+
 DIR_WALK:
 FATLOOP:
 	LD	A, BYTE_READ
@@ -257,49 +256,7 @@ FATLOOP:
 FATEND:
 	RET
 
-FATENT:
-	DS	32
-FILENAME:
-	DB	0
-ROOTNAME:
-	DB	"/",0
-BASFILE:
-	DB	"/ALIEN.CMT",0
-;	DB	"/TEST.CMT",0
-;	DB	"/CLOCK.CMT",0
-BINFILE:
-	DB	"BIN.CMT",0
-
-FIREWALL:
-	DS	2
-
-IS_CALLBACK:
-	DS	01H 
-
-INFO_BUF:
-	DS	10H
-
-INFO_SW:
-	DS      01H
-
-FILE_BFFR:
-	DS	80H
-
-FILE_SIZE:
-	DS	02H
-
-BFFR_POS:
-	DB	0
-
-BFFR_BLOCK:
-	DB	0
-
-ARG0:           DS      02H
-ARG1:           DS      02H
-ARG2:           DS      02H
-ARG3:           DS      02H
-ARGNUM:		DS      01H
-
+;=================================================
 
 SETFNAME:
 	LD	A, SET_FILE_NAME
@@ -314,6 +271,8 @@ FSLOOP:
 FINFS:
 	CALL	WRITEDATA
 	RET
+
+;=================================================
 
 READUSB:
 	LD	A, RD_USB_DATA0
@@ -335,6 +294,8 @@ L02:
 ;	PUT	']'
 	RET
 
+;=================================================
+
 READUSBF:
 	LD	A, RD_USB_DATA0
 	CALL	WRITECMD
@@ -354,6 +315,8 @@ L11:
 L12:
 	RET
 
+;=================================================
+
 INTRCMD:
 	CALL	WRITECMD
 	CALL	WAITINT
@@ -365,11 +328,15 @@ INTRCMD:
 	CALL	READUSB
 	RET
 
+;=================================================
+
 WAITINT:
 	CALL	READCMD
 	AND	A,80H
 	JP	NZ, WAITINT
 	RET
+
+;=================================================
 
 WRITECMD:
 	OUT	(CMD), A
@@ -387,6 +354,8 @@ READCMD:
 	IN	A, (CMD)
 	RET
 
+;=================================================
+
 MDELAY:
 	PUSH	BC
 DLOOP:
@@ -397,4 +366,30 @@ DL1:	NOP
 	JR	NZ,DLOOP
 	POP	BC
 	RET
+
+;=================================================
+
+FILENAME:	DB	0
+ROOTNAME:	DB	"/",0
+
+FIREWALL:	DS	2
+
+IS_CALLBACK:	DS	01H
+
+INFO_BUF:	DS	10H
+
+INFO_SW:	DS      01H
+
+FATENT:		DS	20H
+
+FILE_BFFR:	DS	80H
+FILE_SIZE:	DS	02H
+BFFR_POS:	DB	0
+BFFR_BLOCK:	DB	0
+
+ARG0:		DS	02H
+ARG1:		DS	02H
+ARG2:		DS	02H
+ARG3:		DS	02H
+ARGNUM:		DS	01H
 
