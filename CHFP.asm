@@ -1,0 +1,51 @@
+	GLOBAL	FETCH_1BYTE
+
+	EXTERN	READ_FP_SCTR
+	EXTERN	FILE_BFFR
+
+	EXTERN	BFFR_POS
+	EXTERN	BFFR_BLOCK
+	EXTERN	DISP
+
+PUT     MACRO   C
+        LD      A, C
+        RST     18H
+        ENDM
+
+
+FETCH_1BYTE:
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	LD	A, (BFFR_POS)
+	LD	DE, FILE_BFFR
+	LD	HL, 0
+	LD	L, A
+	ADD	HL, DE
+	LD	B, (HL)
+	INC	A
+	JM	.L1		; Buffer size is 0x80
+	LD	(BFFR_POS), A
+	LD	A, B
+	POP	HL
+	POP	DE
+	POP	BC
+	RET
+
+.L1:
+	XOR	A		; Reset to buffer postion
+	LD	(BFFR_POS), A
+;	PUT	'#'
+	LD	A, (BFFR_BLOCK)
+	INC	A
+	LD	(BFFR_BLOCK), A
+	PUSH	BC
+	CALL	READ_FP_SCTR	; Read next block to buffer
+	POP	BC
+	LD	A, B
+	POP	HL
+	POP	DE
+	POP	BC
+	RET
+	
+	
