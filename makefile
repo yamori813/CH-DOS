@@ -1,6 +1,6 @@
 all:	CHIO.wav
 
-CHIO.wav: CHIO.asm IPL.asm DIR.asm FS.asm CMT.asm CHFP.asm SUBS.asm DEBUG.asm LABELS.inc N80.inc
+CHIO.wav: CHIO.asm IPL.asm DIR.asm FS.asm CMT.asm CHFP.asm SUBS.asm MESSAGES.asm DEBUG.asm LABELS.inc N80.inc
 	zmac --rel CHIO.asm
 	zmac --rel IPL.asm
 	zmac --rel DIR.asm
@@ -8,8 +8,9 @@ CHIO.wav: CHIO.asm IPL.asm DIR.asm FS.asm CMT.asm CHFP.asm SUBS.asm DEBUG.asm LA
 	zmac --rel CMT.asm
 	zmac --rel CHFP.asm
 	zmac --rel SUBS.asm
+	zmac --rel MESSAGES.asm
 	zmac --rel DEBUG.asm
-	ld80 -P 6000 -o zout/CHIO.hex zout/CHIO.rel zout/IPL.rel zout/DIR.rel zout/FS.rel zout/CMT.rel zout/CHFP.rel zout/SUBS.rel zout/DEBUG.rel
+	ld80 -P 6000 -o zout/CHIO.hex zout/CHIO.rel zout/IPL.rel zout/DIR.rel zout/FS.rel zout/CMT.rel zout/CHFP.rel zout/SUBS.rel zout/MESSAGES.rel  zout/DEBUG.rel
 	ihex2monl -i zout/CHIO.hex CHIO.wav
 
 clean:

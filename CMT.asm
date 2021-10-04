@@ -13,6 +13,7 @@
 	EXTERN	IS_INFO_ON
 	EXTERN	FETCH_1BYTE
 	EXTERN	READ_FP_SCTR
+	EXTERN	MSG_MEMORY_CONFLICT
 
 ;CMTファイルフォーマット
 
@@ -63,7 +64,7 @@ READ_CMT:
 	XOR	A			;A<-0
 .L1:	CP	BIN_MARK		;マシン語マーカーか？
 	JR	NZ,.L3			;
-;	CALL	READ_CMT_BINARY		;
+	CALL	READ_CMT_BINARY		;
 	XOR	A			;A<-0
 .L3:	AND	A			;00Hとマーカー以外の値ならスキップ
 	JR	NZ,.L4			;
@@ -134,53 +135,53 @@ READ_CMT_BASIC:
 ;;IN  FP=ファイルポインタ
 ;;OUT FP,Z=1:正常終了
 ;;=================================================
-;READ_CMT_BINARY:
-;	CALL	GET_FIREWALL		;スタックエリア侵入防止用の境界値をセットする
-;;	LD	(FIREWALL),DE		;
-;
-;	CALL	FETCH_1BYTE		;A<-(FP),FP++
-;	LD	H,A			;HL<-マシン語ファイルの先頭アドレス
-;	CALL	FETCH_1BYTE		;A<-(FP),FP++
-;	LD	L,A			;
-;	CALL	FETCH_1BYTE		;A<-(FP),FP++ チェックバイト部は捨てる
-;
-;	CALL	IS_INFO_ON		;
-;	JR	Z,.L1			;
-;	CALL	IPRINT			;
-;	DB	"[BIN]",CR,LF,EOL	;
-;	CALL	PRTHLHEX		;先頭アドレスを表示
-;
-;.L1:	CALL	FETCH_1BYTE		;A<-(FP),FP++
-;	CP	BIN_MARK		;マーカーでなければエラー処理へ
-;	JP	NZ,READ_ERR		;
-;
-;	CALL	FETCH_1BYTE		;A<-(FP),FP++
-;	AND	A			;データ長が0なら終了へ
-;	JR	Z,.L3			;
-;
-;	LD	B,A			;B=データ長
-;.L2:	PUSH	BC			;
-;	CALL	FETCH_1BYTE		;データ転送処理
-;	LD	(HL),A			;
-;	INC	HL			;
-;	CALL	CHECK_STACK_AREA	;スタックエリアに侵入しているかチェックする
-;	POP	BC			;
-;	DJNZ	.L2			;データ長だけ繰り返す
-;	CALL	FETCH_1BYTE		;A<-(FP),FP++ チェックバイト部は捨てる
-;	JR	.L1			;
-;
-;.L3:	DEC	HL			;
-;
-;	CALL	IS_INFO_ON		;
-;	JR	Z,.L5			;
-;	LD	A,"-"			;終了アドレスを表示
-;	RST	18H			;
-;	CALL	PRTHLHEX		;
-;	CALL	PUT_CR			;
-;
-;.L5:	CALL	FETCH_1BYTE		;FP++
-;	RET				;
-;
+READ_CMT_BINARY:
+	CALL	GET_FIREWALL		;スタックエリア侵入防止用の境界値をセットする
+;	LD	(FIREWALL),DE		;
+
+	CALL	FETCH_1BYTE		;A<-(FP),FP++
+	LD	H,A			;HL<-マシン語ファイルの先頭アドレス
+	CALL	FETCH_1BYTE		;A<-(FP),FP++
+	LD	L,A			;
+	CALL	FETCH_1BYTE		;A<-(FP),FP++ チェックバイト部は捨てる
+
+	CALL	IS_INFO_ON		;
+	JR	Z,.L21			;
+	CALL	IPRINT			;
+	DB	"[BIN]",CR,LF,EOL	;
+	CALL	PRTHLHEX		;先頭アドレスを表示
+
+.L21:	CALL	FETCH_1BYTE		;A<-(FP),FP++
+	CP	BIN_MARK		;マーカーでなければエラー処理へ
+	JP	NZ,READ_ERR		;
+
+	CALL	FETCH_1BYTE		;A<-(FP),FP++
+	AND	A			;データ長が0なら終了へ
+	JR	Z,.L23			;
+
+	LD	B,A			;B=データ長
+.L22:	PUSH	BC			;
+	CALL	FETCH_1BYTE		;データ転送処理
+	LD	(HL),A			;
+	INC	HL			;
+	CALL	CHECK_STACK_AREA	;スタックエリアに侵入しているかチェックする
+	POP	BC			;
+	DJNZ	.L22			;データ長だけ繰り返す
+	CALL	FETCH_1BYTE		;A<-(FP),FP++ チェックバイト部は捨てる
+	JR	.L21			;
+
+.L23:	DEC	HL			;
+
+	CALL	IS_INFO_ON		;
+	JR	Z,.L25			;
+	LD	A,"-"			;終了アドレスを表示
+	RST	18H			;
+	CALL	PRTHLHEX		;
+	CALL	PUT_CR			;
+
+.L25:	CALL	FETCH_1BYTE		;FP++
+	RET				;
+
 ;=================================================
 ;[CMT]リードエラー
 ;IN  HL=アドレス
@@ -193,33 +194,33 @@ READ_ERR:
 	LD	E,BAD_FILE_DATA		;
 	JP	ERROR			;
 
-;;=================================================
-;;[CMT]スタックエリア侵入チェック
-;;IN  HL=対象のアドレス
-;;OUT 
-;;=================================================
-;CHECK_STACK_AREA:
-;	PUSH	DE
-;	PUSH	HL
-;
-;	EX	DE,HL			;DE=アドレス
-;	LD	HL,(FREE_END)		;HL<-フリーエリアの底
-;	CALL	CPHLDE			;
-;	JR	C,.EXIT			;スタックエリアの底 < アドレス
-;
-;	LD	HL,(FIREWALL)		;HL<-スタックエリアとフリーエリアの境界値
-;	CALL	CPHLDE			;
-;	JR	NC,.EXIT		;スタックエリアとフリーエリアの境界値 >= アドレス
-;
-;.ERR:	XOR	A			;
-;	LD	(FKEY_FLAG),A		;！重要！ファンクションキー押下フラグを降ろす
-;	LD	HL,MSG_MEMORY_CONFLICT	;スタックエリア侵入エラー
-;	JP	ERR			;
-;
-;.EXIT:	POP	HL
-;	POP	DE
-;	RET
-;
+;=================================================
+;[CMT]スタックエリア侵入チェック
+;IN  HL=対象のアドレス
+;OUT 
+;=================================================
+CHECK_STACK_AREA:
+	PUSH	DE
+	PUSH	HL
+
+	EX	DE,HL			;DE=アドレス
+	LD	HL,(FREE_END)		;HL<-フリーエリアの底
+	CALL	CPHLDE			;
+	JR	C,.EXIT			;スタックエリアの底 < アドレス
+
+	LD	HL,(FIREWALL)		;HL<-スタックエリアとフリーエリアの境界値
+	CALL	CPHLDE			;
+	JR	NC,.EXIT		;スタックエリアとフリーエリアの境界値 >= アドレス
+
+.ERR:	XOR	A			;
+	LD	(FKEY_FLAG),A		;！重要！ファンクションキー押下フラグを降ろす
+	LD	HL,MSG_MEMORY_CONFLICT	;スタックエリア侵入エラー
+	JP	.ERR			;
+
+.EXIT:	POP	HL
+	POP	DE
+	RET
+
 ;=================================================
 ;[CMT]スタックエリアとフリーエリアの境界値を求める
 ;OUT DE=境界値
