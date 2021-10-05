@@ -221,7 +221,6 @@ READ_FP_SCTR:
 ;=================================================
 
 DIR_WALK:
-FATLOOP:
 	LD	A, BYTE_READ
 	WRITECMD
 	LD	A, 32
@@ -242,11 +241,20 @@ FATLOOP:
 	OR	A, A
 	JZ	FATEND
 	CP	A, 0E5H
-	JZ	FATLOOP
+	JZ	DIR_WALK
 	LD	HL, FATENT
 	CALL	PRT_DENT
-	JMP	FATLOOP
+	JR	DIR_WALK
 FATEND:
+	LD	A, BYTE_LOCATION	; back to start postion
+	WRITECMD
+	XOR	A
+	WRITEDATA
+	WRITEDATA
+	WRITEDATA
+	WRITEDATA
+	CALL	WAITINT
+	
 	RET
 
 ;=================================================
