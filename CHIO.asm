@@ -152,6 +152,9 @@ CH_FILES:
 ;=================================================
 
 CH_LOAD:
+	XOR	A
+	LD	(BFFR_POS), A
+	LD	(BFFR_BLOCK), A
 
 	LD	HL, (ARG0)
 	CALL	SETFNAME
@@ -190,7 +193,6 @@ CH_LOAD:
 
 	LD	A, FILE_OPEN
 	CALL	INTRCMD
-	POP	HL
 
 	RET
 
