@@ -6,6 +6,7 @@
 	INCLUDE "LABELS.inc"
 
 	GLOBAL	MSG_MEMORY_CONFLICT
+	GLOBAL	MSG_NG_CHR
 
 ;=================================================
 ;文字列

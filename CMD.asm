@@ -16,6 +16,7 @@
 	EXTERN	GET_ARGS
 	EXTERN	STR2BUFF
 	EXTERN	ARG0
+	EXTERN	TRACE_PATH
 
 ;;=================================================
 ;;[CMD]CMD命令
@@ -182,17 +183,17 @@ LOAD:
 ;	CALL	SET_DENT_FAT			;
 ;	RET
 ;
-;;=================================================
-;;[CMD]POLL命令 ワーキングディレクトリを変更する
-;;=================================================
-;POLL:
-;	CALL	STR2BUFF			;
-;	PUSH	HL				;
+;=================================================
+;[CMD]POLL命令 ワーキングディレクトリを変更する
+;=================================================
+POLL:
+	CALL	STR2BUFF			;
+	PUSH	HL				;
 ;	CALL	IS_FAT16			;
-;	LD	HL,STR_BUFF			;
-;	CALL	TRACE_PATH			;
-;	JP	CLOSE_CMD			;
-;
+	LD	HL,STR_BUFF			;
+	CALL	TRACE_PATH			;
+	JP	CLOSE_CMD			;
+
 ;;=================================================
 ;;[CMD]KILL命令 ファイルを削除する
 ;;=================================================
@@ -241,18 +242,17 @@ MOUNT:
 ;[CMD]FILES命令 指定されたディレクトリのエントリ一覧を表示する
 ;=================================================
 FILES:
-;	CP	":"				;
-;	JR	Z,.L1				;
-;	OR	A				;
-;	JR	Z,.L1				;
-;	CALL	POLL				;
-;.L1:	PUSH	HL				;
+	CP	":"				;
+	JR	Z,.L1				;
+	OR	A				;
+	JR	Z,.L1				;
+	CALL	POLL				;
+.L1:	PUSH	HL				;
 ;	CALL	IS_FAT16			;
 ;	LD	HL,(WDIR_CLSTR)			;
 ;	LD	IY,PRT_DENT			;
 ;	CALL	DIR_WALK			;
 ;	POP	HL				;
-	PUSH	HL
 	CALL	CH_FILES
 	POP	HL
 	RET					;
