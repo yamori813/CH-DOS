@@ -41,6 +41,8 @@
 
 	EXTERN	DISP
 
+;=================================================
+
 START:
 	CALL	INIT_FAT16
 	CALL	INIT_CMDHOOK
@@ -104,6 +106,20 @@ INIT_CH376:
 
 ;=================================================
 
+INIT_CMDHOOK:
+	LD	HL, MOUNT
+	LD	(ENT_MOUNT),HL
+
+	LD	HL, FILES
+	LD	(ENT_FILES),HL
+
+	LD	HL, LOAD
+	LD	(ENT_LOAD),HL
+
+	RET
+
+;=================================================
+
 CH_OPENDIR:
 	LD	HL, DIR_ENTRY
 	CALL	SETFNAME
@@ -112,8 +128,9 @@ CH_OPENDIR:
 	CALL	INTRCMD
 	RET
 
-CH_FILES:
+;=================================================
 
+CH_FILES:
 
 	CALL	DIR_WALK
 
@@ -168,19 +185,12 @@ CH_LOAD:
 ;	PUT	' '
 	CALL	READUSB
 
-	RET
+	LD	HL, ROOTNAME
+	CALL	SETFNAME
 
-;=================================================
-
-INIT_CMDHOOK:
-	LD	HL, MOUNT
-	LD	(ENT_MOUNT),HL
-
-	LD	HL, FILES
-	LD	(ENT_FILES),HL
-
-	LD	HL, LOAD
-	LD	(ENT_LOAD),HL
+	LD	A, FILE_OPEN
+	CALL	INTRCMD
+	POP	HL
 
 	RET
 
