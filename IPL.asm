@@ -1,7 +1,10 @@
+;
+;
+;
 
 
 	GLOBAL	IPRINT
-;
+
 ;;IPL
 ;
 ;INCLUDE "LABELS.ASM"

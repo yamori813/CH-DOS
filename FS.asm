@@ -1,3 +1,6 @@
+;
+;
+;
 
 	INCLUDE "N80.inc"
 	INCLUDE "LABELS.inc"
@@ -5,7 +8,6 @@
 	GLOBAL	PRT_FSIZE
 	GLOBAL	STR2BUFF
 
-;
 ;;=================================================
 ;;[FS]自動実行
 ;;・"/HELLO.CMT"が存在すればロードしてBASICを実行する

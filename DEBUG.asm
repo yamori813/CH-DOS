@@ -1,3 +1,7 @@
+;
+;
+;
+
 	GLOBAL	DISP
 
 DISP:

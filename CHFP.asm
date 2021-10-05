@@ -1,3 +1,7 @@
+;
+;
+;
+
 	GLOBAL	FETCH_1BYTE
 
 	EXTERN	READ_FP_SCTR
@@ -5,13 +9,6 @@
 
 	EXTERN	BFFR_POS
 	EXTERN	BFFR_BLOCK
-	EXTERN	DISP
-
-PUT     MACRO   C
-        LD      A, C
-        RST     18H
-        ENDM
-
 
 FETCH_1BYTE:
 	PUSH	BC
@@ -35,7 +32,6 @@ FETCH_1BYTE:
 .L1:
 	XOR	A		; Reset to buffer postion
 	LD	(BFFR_POS), A
-;	PUT	'#'
 	LD	A, (BFFR_BLOCK)
 	INC	A
 	LD	(BFFR_BLOCK), A

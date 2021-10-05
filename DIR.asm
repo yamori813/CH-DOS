@@ -2,6 +2,14 @@
 ;
 ;
 
+	INCLUDE "N80.inc"
+	INCLUDE "LABELS.inc"
+
+	GLOBAL	PRT_DENT
+
+	EXTERN	PRT_FSIZE
+	EXTERN	IPRINT
+
 ;--------------------------
 ;ディレクトリエントリ構造
 ;--------------------------
@@ -18,14 +26,6 @@
 ;1A~1BH:FATエントリ	:2	IDX_FAT
 ;1C~1FH:ファイルサイズ	:4	IDX_SIZE
 ;--------------------------
-
-	INCLUDE "N80.inc"
-	INCLUDE "LABELS.inc"
-
-	EXTERN	PRT_FSIZE
-	EXTERN	IPRINT
-
-	GLOBAL	PRT_DENT
 
 ;;=================================================
 ;;[DIR]エントリ名と属性に一致するディレクトリエントリを探して(DIR_ENTRY)に格納する

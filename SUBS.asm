@@ -1,3 +1,10 @@
+;
+;
+;
+
+	GLOBAL	IS_INFO_ON
+	GLOBAL	GET_ARGS
+
 	EXTERN	INFO_SW
 	EXTERN	STR2ARG0
 	EXTERN	EXP2WORD
@@ -6,8 +13,6 @@
 	EXTERN	ARG2
 	EXTERN	ARG3
 	EXTERN	ARGNUM
-	GLOBAL	IS_INFO_ON
-	GLOBAL	GET_ARGS
 
 ;=================================================
 ;[SUB]インフォメーションスイッチがオンかチェックする
