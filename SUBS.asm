@@ -4,6 +4,7 @@
 
 	GLOBAL	IS_INFO_ON
 	GLOBAL	GET_ARGS
+	GLOBAL	IPRINT
 
 	EXTERN	INFO_SW
 	EXTERN	STR2ARG0
@@ -235,24 +236,24 @@ RESET_ARGS:
 ;	POP	BC				;
 ;	RET					;
 ;
-;;=================================================
-;;[SUB]文字列を表示する
-;;IN  (SP)=文字列の先頭アドレス
-;;OUT -
-;;=================================================
-;IPRINT:
-;	EX	(SP),HL				;
-;	PUSH	AF				;
-;.L1:	LD	A,(HL)				;
-;	INC	HL				;
-;	OR	A				;
-;	JR	Z,.L2				;
-;	RST	18H				;
-;	JR	.L1				;
-;.L2:	POP	AF				;
-;	EX	(SP),HL				;
-;	RET					;
-;
+;=================================================
+;[SUB]文字列を表示する
+;IN  (SP)=文字列の先頭アドレス
+;OUT -
+;=================================================
+IPRINT:
+	EX	(SP),HL				;
+	PUSH	AF				;
+.L11:	LD	A,(HL)				;
+	INC	HL				;
+	OR	A				;
+	JR	Z,.L12				;
+	RST	18H				;
+	JR	.L11				;
+.L12:	POP	AF				;
+	EX	(SP),HL				;
+	RET					;
+
 ;;=================================================
 ;;[SUB]16進数を表示する
 ;;IN  A
