@@ -7,6 +7,7 @@
 
 	GLOBAL	MSG_MEMORY_CONFLICT
 	GLOBAL	MSG_NG_CHR
+	GLOBAL	MSG_NOT_FOUND
 
 ;=================================================
 ;文字列

@@ -2,9 +2,13 @@
 ;
 ;
 
+	INCLUDE "N80.inc"
+	INCLUDE "LABELS.inc"
+
 	GLOBAL	IS_INFO_ON
 	GLOBAL	GET_ARGS
 	GLOBAL	IPRINT
+	GLOBAL	ERR
 
 	EXTERN	INFO_SW
 	EXTERN	STR2ARG0
@@ -179,17 +183,17 @@ RESET_ARGS:
 ;.EXIT:	POP	AF				;
 ;	RET					;
 ;
-;;=================================================
-;;[SUB]エラーメッセージ表示
-;;IN  HL=メッセージのアドレス
-;;OUT -
-;;=================================================
-;ERR:
-;	CALL	PRINT				;
-;	CALL	PUT_CR				;
-;	LD	E,UNPRINTABLE			;
-;	JP	ERROR				;
-;
+;=================================================
+;[SUB]エラーメッセージ表示
+;IN  HL=メッセージのアドレス
+;OUT -
+;=================================================
+ERR:
+	CALL	PRINT				;
+	CALL	PUT_CR				;
+	LD	E,UNPRINTABLE			;
+	JP	ERROR				;
+
 ;;=================================================
 ;;[SUBS]YES / NO 入力待ち
 ;;IN  HL=メッセージ用文字列のアドレス
