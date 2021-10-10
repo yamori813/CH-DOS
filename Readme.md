@@ -1,6 +1,6 @@
 This is CH376 contole program on PC-8001.
 
-This is Z80 assembla. This project use zasm an ld80.
+This code developed by Z80 assembla. This project use zasm an ld80.
 
 This program load to 8K RAM at 6000H.
 
