@@ -15,6 +15,7 @@
 	EXTERN	IS_NGCHR
 	EXTERN	ADD_STR
 	EXTERN	CH_OPENDIR
+	EXTERN	CH_CLOSEDIR
 
 ;=================================================
 ;[CD]ディレクトリエントリバッファのエントリ名をゼロクリアする
@@ -59,6 +60,7 @@ ENTER_SUBDIR:
 ;	LD	HL,(DIR_ENTRY+IDX_FAT)		;HL<-一致したディレクトリエントリのクラスタ＃
 ;.E1:	LD	(WDIR_CLSTR),HL			;(WDIR_CLSTR)<-ディレクトリエントリのクラスタ＃
 ;.EXIT:	POP	HL				;
+	CALL	CH_CLOSEDIR
 	CALL	CH_OPENDIR
 	RET					;
 
@@ -119,30 +121,52 @@ ENTER_ROOT:
 ;OUT (WDIR_CLSTR)=パス文字列から求められたクラスタ＃,HL=エントリ名の開始アドレス-1
 ;=================================================
 TRACE_PATH:
-	LD	A,(HL)				;！重要！最初の文字が00Hなら「ルート」に移動して終了
-	OR	A				;例えば"/FILE.EXT" は 00H,"FILE.EXT" と変換されるため
-	JR	Z,ENTER_ROOT			;
-	CP	"/"				;最初の文字が"/"なら「ルート」に移動
-	JR	NZ,.L4				;
-	CALL	ENTER_ROOT			;
-	INC	HL				;
-.L4:	CALL	CLR_DNAME			;バッファのエントリ名を00Hでクリア
-.L1:	LD	A,(HL)				;Aが00Hまたは22Hなら
-	CALL	IS_EOT				;
-	JR	Z,ENTER_SUBDIR			;バッファに残っているディレクトリに移動して終了
-	INC	HL				;区切り文字検出
-	CP	"/"				;
-	JR	NZ,.ADD				;
-	CALL	ENTER_SUBDIR			;ディレクトリ移動実行
-	JR	.L4				;
-
-.ADD:	PUSH	HL				;
-	CALL	FIX_CHR				;文字コードを修正
-	CALL	IS_NGCHR			;使用できない文字を検出
-	LD	HL,DNAME			;
-	LD	C,A				;
+;	LD	A,(HL)				;！重要！最初の文字が00Hなら「ルート」に移動して終了
+;	OR	A				;例えば"/FILE.EXT" は 00H,"FILE.EXT" と変換されるため
+;	JR	Z,ENTER_ROOT			;
+;	CP	"/"				;最初の文字が"/"なら「ルート」に移動
+;	JR	NZ,.L4				;
+;	CALL	ENTER_ROOT			;
+;	INC	HL				;
+;.L4:	CALL	CLR_DNAME			;バッファのエントリ名を00Hでクリア
+;.L1:	LD	A,(HL)				;Aが00Hまたは22Hなら
+;	CALL	IS_EOT				;
+;	JR	Z,ENTER_SUBDIR			;バッファに残っているディレクトリに移動して終了
+;	INC	HL				;区切り文字検出
+;	CP	"/"				;
+;	JR	NZ,.ADD				;
+;
+;	CALL	ENTER_SUBDIR			;ディレクトリ移動実行
+;	JR	.L4				;
+;
+;.ADD:	PUSH	HL				;
+;	CALL	FIX_CHR				;文字コードを修正
+;	CALL	IS_NGCHR			;使用できない文字を検出
+;	LD	HL,DNAME			;
+;	LD	C,A				;
+;	CALL	ADD_STR				;エントリ名に文字を追加する
+;	POP	HL				;
+;	JR	.L1				;
+	LD	A, (HL)
+	CP	'/'
+	JR	NZ, .L2
+	INC	HL
+	CALL	CLR_DNAME
+.L2:
+	PUSH	HL
+	LD	HL, DNAME			;
+	LD	C, '/'
 	CALL	ADD_STR				;エントリ名に文字を追加する
-	POP	HL				;
+	POP	HL
+.L1	LD	A, (HL)				;
+	CALL	IS_EOT				;
+	JR	Z, ENTER_SUBDIR			;
+	INC	HL				;
+	PUSH	HL
+	LD	HL, DNAME			;
+	LD	C, A				;
+	CALL	ADD_STR				;エントリ名に文字を追加する
+	POP	HL
 	JR	.L1				;
 
 ;;=================================================
