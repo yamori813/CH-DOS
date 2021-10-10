@@ -2,6 +2,10 @@ This is CH376 contole program on PC-8001.
 
 This code developed by Z80 assembla. This project use zmac an ld80.
 
+And my FSK wave generator program.
+
+https://github.com/yamori813/ihex2monl
+
 This program load to 8K RAM at 6000H.
 
 This project based on SD-DOS.
