@@ -10,6 +10,7 @@
 	GLOBAL	INIT_FAT16
 
 	EXTERN	DNAME
+	EXTERN	CLR_DNAME
 
 ;;=================================================
 ;;[FS]自動実行
@@ -87,6 +88,7 @@ INIT_FAT16:
 ;	CALL	INIT_BFFR			;バッファ関連ワーク初期化
 	LD	HL,DNAME			;ディレクトリエントリ文字列の文字数
 	LD	(HL),DNAME_SIZE			;
+	CALL	CLR_DNAME
 ;	LD	HL,ATRB				;ファイル属性文字列の文字数
 ;	LD	(HL),ATRB_SIZE			;
 	RET					;
