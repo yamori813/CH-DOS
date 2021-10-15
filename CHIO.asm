@@ -168,7 +168,7 @@ DIREND:
 ;=================================================
 
 CH_CLOSE:
-	LS	C, A
+	LD	C, A
 	LD	A, FILE_CLOSE
 	WRITECMD
 	LD	A, C
