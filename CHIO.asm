@@ -197,6 +197,7 @@ CH_FILES:
 	RET
 
 ;=================================================
+; 8.4.2. read file in turn
 
 CH_LOAD:
 	XOR	A
