@@ -61,6 +61,7 @@ ENTER_SUBDIR:
 ;	LD	HL,(DIR_ENTRY+IDX_FAT)		;HL<-一致したディレクトリエントリのクラスタ＃
 ;.E1:	LD	(WDIR_CLSTR),HL			;(WDIR_CLSTR)<-ディレクトリエントリのクラスタ＃
 ;.EXIT:	POP	HL				;
+	LD	A, 0
 	CALL	CH_CLOSE
 	CALL	CH_OPENDIR
 	RET					;
