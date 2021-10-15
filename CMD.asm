@@ -8,11 +8,13 @@
 	GLOBAL	MOUNT
 	GLOBAL	FILES
 	GLOBAL	LOAD
+	GLOBAL	SAVE
 	GLOBAL	STR2ARG0
 
 	EXTERN	INIT_CH376
 	EXTERN	CH_FILES
 	EXTERN	CH_LOAD
+	EXTERN	CH_SAVE
 	EXTERN	GET_ARGS
 	EXTERN	STR2BUFF
 	EXTERN	ARG0
@@ -153,10 +155,10 @@ LOAD:
 	CALL	CH_LOAD
 	JP	CLOSE_CMD			;
 ;
-;;=================================================
-;;[CMD]SAVE命令 メモリ内容をファイルに書き込む
-;;=================================================
-;SAVE:
+;=================================================
+;[CMD]SAVE命令 メモリ内容をファイルに書き込む
+;=================================================
+SAVE:
 ;	CALL	GET_ARGS			;(ARG0)=ファイルパス＋ファイル名の格納アドレス、(ARG1)=先頭アドレス,(ARG2)=終了アドレス
 ;	PUSH	HL				;
 ;	CALL	IS_FAT16			;
@@ -167,8 +169,11 @@ LOAD:
 ;	CALL	EXT_TABLE_JUMP			;拡張子に対応したセーブルーチンへジャンプする
 ;	CALL	WRITE_DENT			;
 ;	CALL	RESTORE_WDIR			;
-;	JP	CLOSE_CMD			;
-;
+	CALL	GET_ARGS			;(ARG0)=ファイルパス＋ファイル名の格納アドレス、(ARG1)=先頭アドレス,(ARG2)=終了アドレス
+	PUSH	HL				;
+	CALL	CH_SAVE
+	JP	CLOSE_CMD			;
+
 ;;=================================================
 ;;[CMD] ファイルパスで指定されたディレクトリにエントリを作成する
 ;;IN  (ARG0)=ファイルパス＋エントリ名,C=作成するエントリの属性

@@ -16,7 +16,7 @@
 	EXTERN	IS_NGCHR
 	EXTERN	ADD_STR
 	EXTERN	CH_OPENDIR
-	EXTERN	CH_CLOSEDIR
+	EXTERN	CH_CLOSE
 
 ;=================================================
 ;[CD]ディレクトリエントリバッファのエントリ名をゼロクリアする
@@ -61,7 +61,7 @@ ENTER_SUBDIR:
 ;	LD	HL,(DIR_ENTRY+IDX_FAT)		;HL<-一致したディレクトリエントリのクラスタ＃
 ;.E1:	LD	(WDIR_CLSTR),HL			;(WDIR_CLSTR)<-ディレクトリエントリのクラスタ＃
 ;.EXIT:	POP	HL				;
-	CALL	CH_CLOSEDIR
+	CALL	CH_CLOSE
 	CALL	CH_OPENDIR
 	RET					;
 

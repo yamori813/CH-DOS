@@ -6,6 +6,7 @@
 	INCLUDE	"LABELS.inc"
 
 	GLOBAL	READ_CMT
+	GLOBAL	WRITE_CMT
 	EXTERN	FIREWALL
 	EXTERN	IPRINT
 	EXTERN	IS_CALLBACK
@@ -13,7 +14,14 @@
 	EXTERN	IS_INFO_ON
 	EXTERN	FETCH_1BYTE
 	EXTERN	READ_FP_SCTR
+	EXTERN	POST_1BYTE
+	EXTERN	FLUSH_BFFR
+	EXTERN	DIR_ENTRY
+	EXTERN	ERR_EMPTY_FILE
 	EXTERN	MSG_MEMORY_CONFLICT
+	EXTERN	ARG1
+	EXTERN	ARG2
+	EXTERN	ARGNUM
 
 ;CMTファイルフォーマット
 
@@ -272,117 +280,117 @@ GET_FIREWALL:
 ;	CALL	CNVHEXBYTE		;16進コード DE→16進 A
 ;	RET
 ;
-;;=================================================
-;;[CMT]CMTファイルの書き込み
-;;IN  (TGT_CLSTR),(ARG0),(ARG1),(ARG2)
-;;OUT 
-;;=================================================
-;WRITE_CMT:
-;	CALL	PREP_WRITE
-;
-;.MERGE:					;MERGEのエントリポイント
-;	LD	HL,.RET			;！重要！戻りアドレスをスタックにセットする
-;	PUSH	HL			;
-;
-;	LD	A,(ARGNUM)		;A<-入力パラメータ数
-;	AND	A			;入力パラメータ数が0ならBASICセーブへ
-;	JR	Z,WRITE_CMT_BASIC	;
-;
-;	DEC	A			;入力パラメータ数が1ならエラーへ
-;	JR	Z,.ERR			;
-;
-;;	LD	DE,(ARG1)		;=開始アドレス
-;;	LD	HL,(ARG2)		;=終了アドレス
-;;	CALL	CPHLDE			;終了アドレス-開始アドレス
-;;	JR	Z,.ERR			;終了アドレス=開始アドレス？
-;;	JR	NC,WRITE_CMT_BINARY	;終了アドレス>開始アドレス？
-;
+;=================================================
+;[CMT]CMTファイルの書き込み
+;IN  (TGT_CLSTR),(ARG0),(ARG1),(ARG2)
+;OUT 
+;=================================================
+WRITE_CMT:
+	CALL	PREP_WRITE
+
+.MERGE:					;MERGEのエントリポイント
+	LD	HL,.RET			;！重要！戻りアドレスをスタックにセットする
+	PUSH	HL			;
+
+	LD	A,(ARGNUM)		;A<-入力パラメータ数
+	AND	A			;入力パラメータ数が0ならBASICセーブへ
+	JR	Z,WRITE_CMT_BASIC	;
+
+	DEC	A			;入力パラメータ数が1ならエラーへ
+	JR	Z,.WERR			;
+
 ;	LD	DE,(ARG1)		;=開始アドレス
 ;	LD	HL,(ARG2)		;=終了アドレス
 ;	CALL	CPHLDE			;終了アドレス-開始アドレス
-;	JR	NC,WRITE_CMT_BINARY	;終了アドレスが、開始アドレスより小さければエラー
-;
-;.ERR:	LD	E,ILLEGAL_FUNCTION_CALL	;引数が不正
-;	JP	ERROR
-;
-;.RET:	JP	FIN_WRITE
-;
-;;=================================================
-;;[CMT]メモリにBASICプログラムが存在するか
-;;IN  -
-;;OUT Z=1:プログラムなし
-;;=================================================
-;IS_BASIC:
-;	PUSH	HL			;
-;	LD	HL,(BASBEGIN)		;開始２バイトが00Hなら空とみなす
-;	LD	A,(HL)			;
-;	INC	HL			;
-;	OR	(HL)			;
-;	POP	HL			;
-;	RET
-;
-;;=================================================
-;;[CMT]BASICファイルの書き込み
-;;=================================================
-;WRITE_CMT_BASIC:
-;	CALL	IS_BASIC		;
-;	JP	Z,ERR_EMPTY_FILE	;
-;
-;	CALL	RAD2RNUM		;BASICの行アドレスを行番号に変換する！重要！
-;	CALL	IPRINT			;
-;	DB	"[BAS]",CR,LF,EOL	;
-;
-;	LD	B,BAS_MARK_LEN		;ヘッダ
-;.HEADR:	LD	A,BAS_MARK		;
-;	CALL	POST_1BYTE		;
-;	DJNZ	.HEADR			;
-;
-;	CALL	IPRINT			;ファイル名
-;	DB	"NAME:",EOL		;
-;
-;	LD	HL,DIR_ENTRY		;
-;	LD	B,BFNAME_SIZE		;
-;.FNAME:	LD	A,(HL)			;
-;	RST	18H			;
-;	CP	SPC			;ファイル名の20Hを00Hに変換する
-;	JR	NZ,.L1			;
-;	XOR	A			;
-;.L1:	CALL	POST_1BYTE		;
-;	INC	HL			;
-;	DJNZ	.FNAME			;
-;	CALL	PUT_CR			;
-;
-;	LD	DE,(BASBEGIN)		;=先頭アドレス
-;	LD	HL,(VARBEGIN)		;=終了アドレス
-;	PUSH	HL			;
-;	OR	A			;CY<-0
-;	SBC	HL,DE			;HL<-終了アドレス-先頭アドレス
-;	LD	B,H			;
-;	LD	C,L			;BC<-プログラムのサイズ
-;	POP	HL			;
-;	EX	DE,HL			;HL=先頭アドレス,DE=終了アドレス
-;
-;.DATA:	LD	A,(HL)			;プログラムデータ部
-;	CALL	POST_1BYTE		;
-;	INC	HL			;
-;	DEC	BC			;
-;	LD	A,B			;
-;	OR	C			;
-;	JR	NZ,.DATA		;
-;
-;	LD	B,9			;フッタ部
-;.FOOTR:	XOR	A			;
-;	CALL	POST_1BYTE		;
-;	DJNZ	.FOOTR			;
-;
-;	RET
-;
-;;=================================================
-;;[CMT]マシン語ファイルの書き込み
-;;IN  DE=先頭アドレス,HL=終了アドレス
-;;OUT 
-;;=================================================
-;WRITE_CMT_BINARY:
+;	JR	Z,.ERR			;終了アドレス=開始アドレス？
+;	JR	NC,WRITE_CMT_BINARY	;終了アドレス>開始アドレス？
+
+	LD	DE,(ARG1)		;=開始アドレス
+	LD	HL,(ARG2)		;=終了アドレス
+	CALL	CPHLDE			;終了アドレス-開始アドレス
+	JR	NC,WRITE_CMT_BINARY	;終了アドレスが、開始アドレスより小さければエラー
+
+.WERR:	LD	E,ILLEGAL_FUNCTION_CALL	;引数が不正
+	JP	ERROR
+
+.RET:	JP	FIN_WRITE
+
+;=================================================
+;[CMT]メモリにBASICプログラムが存在するか
+;IN  -
+;OUT Z=1:プログラムなし
+;=================================================
+IS_BASIC:
+	PUSH	HL			;
+	LD	HL,(BASBEGIN)		;開始２バイトが00Hなら空とみなす
+	LD	A,(HL)			;
+	INC	HL			;
+	OR	(HL)			;
+	POP	HL			;
+	RET
+
+;=================================================
+;[CMT]BASICファイルの書き込み
+;=================================================
+WRITE_CMT_BASIC:
+	CALL	IS_BASIC		;
+	JP	Z,ERR_EMPTY_FILE	;
+
+	CALL	RAD2RNUM		;BASICの行アドレスを行番号に変換する！重要！
+	CALL	IPRINT			;
+	DB	"[BAS]",CR,LF,EOL	;
+
+	LD	B,BAS_MARK_LEN		;ヘッダ
+.HEADR:	LD	A,BAS_MARK		;
+	CALL	POST_1BYTE		;
+	DJNZ	.HEADR			;
+
+	CALL	IPRINT			;ファイル名
+	DB	"NAME:",EOL		;
+
+	LD	HL,DIR_ENTRY		;
+	LD	B,BFNAME_SIZE		;
+.FNAME:	LD	A,(HL)			;
+	RST	18H			;
+	CP	SPC			;ファイル名の20Hを00Hに変換する
+	JR	NZ,.L31			;
+	XOR	A			;
+.L31:	CALL	POST_1BYTE		;
+	INC	HL			;
+	DJNZ	.FNAME			;
+	CALL	PUT_CR			;
+
+	LD	DE,(BASBEGIN)		;=先頭アドレス
+	LD	HL,(VARBEGIN)		;=終了アドレス
+	PUSH	HL			;
+	OR	A			;CY<-0
+	SBC	HL,DE			;HL<-終了アドレス-先頭アドレス
+	LD	B,H			;
+	LD	C,L			;BC<-プログラムのサイズ
+	POP	HL			;
+	EX	DE,HL			;HL=先頭アドレス,DE=終了アドレス
+
+.DATA:	LD	A,(HL)			;プログラムデータ部
+	CALL	POST_1BYTE		;
+	INC	HL			;
+	DEC	BC			;
+	LD	A,B			;
+	OR	C			;
+	JR	NZ,.DATA		;
+
+	LD	B,9			;フッタ部
+.FOOTR:	XOR	A			;
+	CALL	POST_1BYTE		;
+	DJNZ	.FOOTR			;
+
+	RET
+
+;=================================================
+;[CMT]マシン語ファイルの書き込み
+;IN  DE=先頭アドレス,HL=終了アドレス
+;OUT 
+;=================================================
+WRITE_CMT_BINARY:
 ;	CALL	PRT_WRITE_BIN_INFO	;
 ;
 ;	INC	HL			;！重要！データ長計算の便宜上、終了アドレスに１加えておく
@@ -442,9 +450,9 @@ GET_FIREWALL:
 ;	CALL	POST_1BYTE		;終了マーカ 00H,00H
 ;	XOR	A			;
 ;	CALL	POST_1BYTE		;
-;
-;	RET
-;
+
+	RET
+
 ;=================================================
 ;読み込みの前処理
 ;=================================================
@@ -467,10 +475,10 @@ FIN_READ_BASIC:
 	CALL	PRGFIT			;
 	RET
 
-;;=================================================
-;;書き込みの前処理
-;;=================================================
-;PREP_WRITE:
+;=================================================
+;書き込みの前処理
+;=================================================
+PREP_WRITE:
 ;	LD	HL,(TGT_CLSTR)		;
 ;	CALL	INIT_FP			;
 ;	CALL	ERASE_FAT_LINK		;
@@ -482,22 +490,22 @@ FIN_READ_BASIC:
 ;	PUSH	IX			;
 ;	POP	DE			;
 ;	CALL	DW_COPY			;
-;
-;	RET
-;
-;;=================================================
-;;書き込みの後処理
-;;=================================================
-;FIN_WRITE:
+
+	RET
+
+;=================================================
+;書き込みの後処理
+;=================================================
+FIN_WRITE:
 ;	LD	HL,FP			;ファイルサイズをディレクトリエントリにセットする
 ;	LD	DE,DIR_ENTRY+IDX_SIZE	;
 ;	CALL	DW_COPY			;
 ;	LD	HL,(FP_CLSTR)		;HL<-最終クラスタ＃
 ;	LD	DE,0FFFFH		;最終クラスタのFATエントリにFFFFHを書き込む
 ;	CALL	WRITE_FAT_DATA		;
-;	CALL	FLUSH_BFFR		;ファイルバッファとFAT1,2バッファをメディアに書き込む
-;	RET
-;
+	CALL	FLUSH_BFFR		;ファイルバッファとFAT1,2バッファをメディアに書き込む
+	RET
+
 ;;=================================================
 ;;機械語書き込み情報表示
 ;;IN  DE=開始アドレス,HL=終了アドレス
