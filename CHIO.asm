@@ -366,10 +366,10 @@ CH_SAVE:
 ;=================================================
 
 CH_WRITE:
-	LD	C, A
+	LD	B, A
 	LD	A, BYTE_WRITE
 	WRITECMD
-	LD	A, C
+	LD	A, B
 	WRITEDATA
 	XOR	A
 	WRITEDATA
@@ -384,7 +384,7 @@ CH_WRITE:
 	LD	A, WR_REQ_DATA
 	WRITECMD
 
-	READDATA
+	READDATA			; read Data length
 ;	CALL	DISP
 ;	PUT	'*'
 
@@ -392,9 +392,8 @@ CH_WRITE:
 WLOOP:
 	LD	A, (HL)
 	INC	HL
-	WRITEDATA
-	DEC	C
-	JR	NZ, WLOOP
+	WRITEDATA			; write Data stream
+	DJNZ	WLOOP
 
 	LD	A, BYTE_WR_GO
 	WRITECMD
