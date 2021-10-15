@@ -16,4 +16,7 @@ Also SD-DOS use this page's code.
 
 http://w01.tp1.jp/~a571632211/pc8001/index.html
 
-Now only support MOUNT, FILES, LOAD command on BASIC.
+Now support MOUNT, FILES, LOAD, SAVE command on BASIC.
+
+File format is only CMT.
+
