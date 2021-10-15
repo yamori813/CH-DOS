@@ -9,7 +9,6 @@
 	GLOBAL	WRITE_CMT
 	EXTERN	FIREWALL
 	EXTERN	IPRINT
-	EXTERN	IS_CALLBACK
 	EXTERN	INFO_BUF
 	EXTERN	IS_INFO_ON
 	EXTERN	FETCH_1BYTE
@@ -457,8 +456,8 @@ WRITE_CMT_BINARY:
 ;読み込みの前処理
 ;=================================================
 PREP_READ:
-	XOR	A			;コールバックフラグを降ろす
-	LD	(IS_CALLBACK),A		;
+;	XOR	A			;コールバックフラグを降ろす
+;	LD	(IS_CALLBACK),A		;
 ;	LD	HL,(TGT_CLSTR)		;HL<-ファイルの開始クラスタ＃
 ;	CALL	INIT_FP			;ファイルポインタ初期化
 ;	LD	IX,FILE_BFFR_STRCT	;IX<-ファイルバッファ構造体のポインタ
