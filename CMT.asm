@@ -391,65 +391,65 @@ WRITE_CMT_BASIC:
 ;OUT 
 ;=================================================
 WRITE_CMT_BINARY:
-;	CALL	PRT_WRITE_BIN_INFO	;
-;
-;	INC	HL			;！重要！データ長計算の便宜上、終了アドレスに１加えておく
-;	LD	A,BIN_MARK		;先頭マーカー部
-;	CALL	POST_1BYTE		;
-;
-;	LD	A,D			;先頭アドレス部
-;	CALL	POST_1BYTE		;
-;	LD	A,E			;
-;	CALL	POST_1BYTE		;
-;
-;	LD	A,D			;チェックサム計算
-;	ADD	A,E			;
-;	CPL				;
-;	INC	A			;
-;	CALL	POST_1BYTE		;チェックサム部
-;
-;.L2:	LD	A,BIN_MARK		;マーカー部
-;	CALL	POST_1BYTE		;
-;
-;	CALL	CPHLDE			;
-;	JR	Z,.EXIT			;先頭アドレス=(終了アドレス+1)なら終了
-;
-;	PUSH	HL			;終了アドレス退避
-;	LD	B,0FFH			;ブロック内データの最大値 255
-;	OR	A			;CY<-0
-;	SBC	HL,DE			;HL<-終了アドレス-先頭アドレス
-;	LD	A,H			;H>0ならB<-0FFH
-;	OR	A			;H=0ならB<-L
-;	JR	NZ,.L3			;
-;	LD	B,L			;
-;.L3:	LD	A,B			;
-;	CALL	POST_1BYTE		;ブロックサイズ部
-;	POP	HL			;終了アドレス復帰
-;
-;	EX	DE,HL			;HL=先頭アドレス,DE=終了アドレス
-;	LD	C,B			;C<-サイズ チェックサム用
-;
-;.L1:	LD	A,(HL)			;A<-(先頭アドレス)
-;	PUSH	AF			;
-;	CALL	POST_1BYTE		;データ部
-;	POP	AF			;
-;
-;	ADD	A,C			;データブロックのチェックサムを計算
-;	LD	C,A			;C<-C+A
-;
-;	INC	HL			;先頭アドレス++
-;	DJNZ	.L1			;
-;
-;	EX	DE,HL			;DE=先頭アドレス,HL=終了アドレス
-;	LD	A,C			;A<-チェックサム
-;	NEG				;符号を反転
-;	CALL	POST_1BYTE		;チェックサム部
-;	JR	.L2			;
-;
-;.EXIT:	XOR	A			;
-;	CALL	POST_1BYTE		;終了マーカ 00H,00H
-;	XOR	A			;
-;	CALL	POST_1BYTE		;
+	CALL	PRT_WRITE_BIN_INFO	;
+
+	INC	HL			;！重要！データ長計算の便宜上、終了アドレスに１加えておく
+	LD	A,BIN_MARK		;先頭マーカー部
+	CALL	POST_1BYTE		;
+
+	LD	A,D			;先頭アドレス部
+	CALL	POST_1BYTE		;
+	LD	A,E			;
+	CALL	POST_1BYTE		;
+
+	LD	A,D			;チェックサム計算
+	ADD	A,E			;
+	CPL				;
+	INC	A			;
+	CALL	POST_1BYTE		;チェックサム部
+
+.L42:	LD	A,BIN_MARK		;マーカー部
+	CALL	POST_1BYTE		;
+
+	CALL	CPHLDE			;
+	JR	Z,.BEXIT		;先頭アドレス=(終了アドレス+1)なら終了
+
+	PUSH	HL			;終了アドレス退避
+	LD	B,0FFH			;ブロック内データの最大値 255
+	OR	A			;CY<-0
+	SBC	HL,DE			;HL<-終了アドレス-先頭アドレス
+	LD	A,H			;H>0ならB<-0FFH
+	OR	A			;H=0ならB<-L
+	JR	NZ,.L43			;
+	LD	B,L			;
+.L43:	LD	A,B			;
+	CALL	POST_1BYTE		;ブロックサイズ部
+	POP	HL			;終了アドレス復帰
+
+	EX	DE,HL			;HL=先頭アドレス,DE=終了アドレス
+	LD	C,B			;C<-サイズ チェックサム用
+
+.L41:	LD	A,(HL)			;A<-(先頭アドレス)
+	PUSH	AF			;
+	CALL	POST_1BYTE		;データ部
+	POP	AF			;
+
+	ADD	A,C			;データブロックのチェックサムを計算
+	LD	C,A			;C<-C+A
+
+	INC	HL			;先頭アドレス++
+	DJNZ	.L41			;
+
+	EX	DE,HL			;DE=先頭アドレス,HL=終了アドレス
+	LD	A,C			;A<-チェックサム
+	NEG				;符号を反転
+	CALL	POST_1BYTE		;チェックサム部
+	JR	.L42			;
+
+.BEXIT:	XOR	A			;
+	CALL	POST_1BYTE		;終了マーカ 00H,00H
+	XOR	A			;
+	CALL	POST_1BYTE		;
 
 	RET
 
@@ -506,28 +506,24 @@ FIN_WRITE:
 	CALL	FLUSH_BFFR		;ファイルバッファとFAT1,2バッファをメディアに書き込む
 	RET
 
-;;=================================================
-;;機械語書き込み情報表示
-;;IN  DE=開始アドレス,HL=終了アドレス
-;;=================================================
-;PRT_WRITE_BIN_INFO:
-;	CALL	IPRINT			;
-;	DB	"[BIN]",CR,LF,EOL	;
-;	PUSH	DE			;
-;	PUSH	HL			;
-;	EX	DE,HL			;
-;	CALL	PRTHLHEX		;
-;	LD	A,"-"			;
-;	RST	18H			;
-;
-;	EX	DE,HL			;
-;	CALL	PRTHLHEX		;
-;	CALL	PUT_CR			;
-;	POP	HL			;
-;	POP	DE			;
-;	RET
-;
-;
-;
-;
-;
+;=================================================
+;機械語書き込み情報表示
+;IN  DE=開始アドレス,HL=終了アドレス
+;=================================================
+PRT_WRITE_BIN_INFO:
+	CALL	IPRINT			;
+	DB	"[BIN]",CR,LF,EOL	;
+	PUSH	DE			;
+	PUSH	HL			;
+	EX	DE,HL			;
+	CALL	PRTHLHEX		;
+	LD	A,"-"			;
+	RST	18H			;
+
+	EX	DE,HL			;
+	CALL	PRTHLHEX		;
+	CALL	PUT_CR			;
+	POP	HL			;
+	POP	DE			;
+	RET
+
