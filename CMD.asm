@@ -9,12 +9,14 @@
 	GLOBAL	FILES
 	GLOBAL	LOAD
 	GLOBAL	SAVE
+	GLOBAL	KILL
 	GLOBAL	STR2ARG0
 
 	EXTERN	INIT_CH376
 	EXTERN	CH_FILES
 	EXTERN	CH_LOAD
 	EXTERN	CH_SAVE
+	EXTERN	CH_KILL
 	EXTERN	GET_ARGS
 	EXTERN	STR2BUFF
 	EXTERN	ARG0
@@ -199,10 +201,10 @@ POLL:
 	CALL	TRACE_PATH			;
 	JP	CLOSE_CMD			;
 
-;;=================================================
-;;[CMD]KILL命令 ファイルを削除する
-;;=================================================
-;KILL:
+;=================================================
+;[CMD]KILL命令 ファイルを削除する
+;=================================================
+KILL:
 ;	CALL	STR2ARG0			;
 ;	PUSH	HL				;
 ;	CALL	IS_FAT16			;
@@ -224,7 +226,11 @@ POLL:
 ;	CALL	FLUSH_BFFR			;全バッファ書き込み
 ;	CALL	RESTORE_WDIR			;
 ;.EXIT:	JP	CLOSE_CMD
-;
+	CALL	GET_ARGS			;(ARG0)=ファイルパス＋ファイル名の格納アドレス、(ARG1)=先頭アドレス,(ARG2)=終了アドレス
+	PUSH	HL				;
+	CALL	CH_KILL
+.KEXIT:	JP	CLOSE_CMD
+
 ;=================================================
 ;[CMD]MOUNT命令 SDカードのプライマリパーティションをマウントする
 ;=================================================
