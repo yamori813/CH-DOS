@@ -237,7 +237,6 @@ GSIZE:
 	READDATA
 ;	CALL	DISP
 ;	PUT	' '
-	CALL	READUSB
 
 	CALL	CH_OPENDIR
 
@@ -417,28 +416,6 @@ CH_KILL:
 
 ;=================================================
 
-READUSB:
-	LD	A, RD_USB_DATA0
-	WRITECMD
-	READDATA
-	LD	C, A
-;	CALL	DISP
-;	PUT	'['
-	LD	A, C
-	OR	A, A
-	JP	Z, L02
-LO1:
-	READDATA
-;	CALL	DISP
-;	PUT	' '
-	DEC	C
-	JP	NZ, LO1
-L02:
-;	PUT	']'
-	RET
-
-;=================================================
-
 READUSBF:
 	LD	A, RD_USB_DATA0
 	WRITECMD
@@ -468,7 +445,6 @@ INTRCMD:
 	READDATA
 ;	CALL	DISP
 ;	PUT	' '
-	CALL	READUSB
 	RET
 
 ;=================================================
