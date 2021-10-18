@@ -51,7 +51,6 @@
 ;=================================================
 
 START:
-	CALL	INIT_FAT16
 	CALL	INIT_CMDHOOK
 
 	JP	05C66H		; Back to mon
@@ -59,6 +58,8 @@ START:
 ;=================================================
 
 INIT_CH376:
+	CALL	INIT_FAT16
+
 	LD	A, GET_IC_VER
 	WRITECMD
 	READDATA
@@ -471,7 +472,6 @@ DL1:	NOP
 ;=================================================
 
 FILENAME:	DB	0
-ROOTNAME:	DB	"/",0
 
 FIREWALL:	DS	2
 
