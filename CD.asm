@@ -146,9 +146,11 @@ TRACE_PATH:
 	LD	A, (HL)
 	CP	'/'
 	JR	NZ, .L2
-	INC	HL
 	CALL	CLR_DNAME
 .L2:
+	LD	A, (DIR_ENTRY+1)
+	AND	A
+	JR	Z, .L1
 	PUSH	HL
 	LD	HL, DNAME			;
 	LD	C, '/'
