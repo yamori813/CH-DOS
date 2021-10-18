@@ -59,7 +59,6 @@ START:
 ;=================================================
 
 INIT_CH376:
-	
 	LD	A, GET_IC_VER
 	WRITECMD
 	READDATA
@@ -104,6 +103,8 @@ INIT_CH376:
 	POP	HL
 
 	RET
+
+;=================================================
 
 CH_REMOVE:
 	LD	A,RESET_ALL
@@ -187,7 +188,6 @@ CH_CLOSE:
 ;=================================================
 
 CH_FILES:
-
 	CALL	DIR_WALK
 
 	RET
