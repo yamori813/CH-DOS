@@ -189,19 +189,6 @@ CH_FILES:
 
 	CALL	DIR_WALK
 
-	LD	A, GET_STATUS
-	WRITECMD
-	READDATA
-;	CALL	DISP
-;	PUT	' '
-	CALL	READUSB
-
-;	LD	A, FILE_CLOSE
-;	WRITECMD
-;	LD	A, 0
-;	WRITEDATA
-;	CALL	WAITINT
-
 	RET
 
 ;=================================================
