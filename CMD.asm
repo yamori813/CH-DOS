@@ -21,6 +21,7 @@
 	EXTERN	STR2BUFF
 	EXTERN	ARG0
 	EXTERN	TRACE_PATH
+	EXTERN	INIT_FAT16
 
 ;;=================================================
 ;;[CMD]CMD命令
@@ -246,7 +247,10 @@ MOUNT:
 ;;	CALL	IS_YEAR79			;日付が未入力ならメッセージを出力
 ;	POP	HL				;
 ;	CALL	AUTOEXEC			;
+	PUSH	HL
 	CALL	INIT_CH376
+	CALL	INIT_FAT16			;FAT16関連ワーク初期化！バッファクリアのため必ず最後に実行する！
+	POP	HL
 	RET					;
 ;
 ;=================================================
