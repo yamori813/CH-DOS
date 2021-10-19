@@ -248,8 +248,8 @@ MOUNT:
 ;	POP	HL				;
 ;	CALL	AUTOEXEC			;
 	PUSH	HL
-	CALL	INIT_CH376
 	CALL	INIT_FAT16			;FAT16関連ワーク初期化！バッファクリアのため必ず最後に実行する！
+	CALL	INIT_CH376
 	POP	HL
 	RET					;
 ;
